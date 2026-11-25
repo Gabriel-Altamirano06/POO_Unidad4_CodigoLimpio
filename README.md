@@ -1,144 +1,117 @@
 
-# Sistema de Gestión Audiovisual
+# Sistema de Gestión de Contenido Audiovisual
 
 ## 1. Descripción del proyecto
 
-El Sistema de Gestión Audiovisual es una aplicación desarrollada en Java mediante los principios de Programación Orientada a Objetos.
+El proyecto consiste en un sistema de gestión de contenidos audiovisuales desarrollado en Java mediante Programación Orientada a Objetos.
 
-El proyecto permite registrar, organizar, consultar y eliminar diferentes tipos de contenidos audiovisuales, utilizando conceptos como herencia, asociación, agregación, composición y polimorfismo.
+Esta versión corresponde a la Unidad 4 y representa una evolución del proyecto hecho anteriormente. Se incorporaron mejoras de código limpio, principios SOLID, arquitectura MVC, manejo de archivos CSV y pruebas unitarias utilizando JUnit.
 
-Su propósito es representar diferentes producciones audiovisuales y administrar la información de las personas y elementos que participen.
+El sistema permite registrar, consultar, buscar y eliminar diferentes tipos de contenidos audiovisuales, conservando la información mediante archivos externos.
 
-## 2. Objetivos del proyecto
+## 2. Objetivos
 
-- Aplicar los conceptos de Programación Orientada a Objetos.
-- Implementar relaciones entre diferentes clases.
-- Utilizar herencia y polimorfismo para organizar los contenidos.
-- Desarrollar un sistema funcional que permita administrar información audiovisual.
+- Mejorar la organización y mantenibilidad del código.
+- Aplicar los cinco principios SOLID.
+- Implementar la arquitectura Modelo-Vista-Controlador.
+- Incorporar lectura y escritura de archivos CSV.
+- Desarrollar pruebas unitarias para comprobar el funcionamiento del sistema.
 
-## 3. Clases del proyecto
-
-### Clases originales
-
-- ContenidoAudiovisual: clase padre que contiene los atributos generales de los contenidos.
-- Pelicula: representa las producciones cinematográficas.
-- SerieDeTV: representa las series de televisión.
-- Documental: representa producciones audiovisuales de carácter documental.
-
-### Clases adicionales
-
-- Actor: almacena información de los actores participantes.
-- Temporada: representa las temporadas de una serie.
-- Investigador: almacena información de los investigadores participantes.
-
-### Nuevas subclases
-
-- VideoMusical: representa producciones audiovisuales musicales, incluyendo información del artista, sello discográfico y participantes.
-- ConferenciaCientifica: representa conferencias científicas y administra información sobre sus temas, instituciones e investigadores.
-
-## 4. Relaciones de Programación Orientada a Objetos
-
-- Herencia: Pelicula, SerieDeTV, Documental, VideoMusical y ConferenciaCientifica heredan de ContenidoAudiovisual.
-- Asociación: Pelicula se relaciona con Actor.
-- Composición: SerieDeTV administra sus objetos Temporada.
-- Agregación: Documental se relaciona con Investigador.
-- Asociación: VideoMusical se relaciona con Actor.
-- Agregación: ConferenciaCientifica se relaciona con Investigador.
-
-## 5. Funcionalidades del sistema
-
-La aplicación cuenta con un menú de consola que permite:
-
-1. Registrar películas y sus actores.
-2. Registrar series y sus temporadas.
-3. Registrar documentales y sus investigadores.
-4. Registrar videos musicales y sus participantes.
-5. Registrar conferencias científicas y sus investigadores.
-6. Mostrar todos los contenidos registrados.
-7. Buscar contenidos mediante su identificador.
-8. Eliminar contenidos registrados.
-
-También incorpora validaciones para evitar datos vacíos y cantidades negativas en los campos numéricos correspondientes.
-
-## 6. Requisitos
-
-- Java JDK 8.
-- Eclipse IDE for Java Developers o un entorno compatible con Java.
-- Git (opcional para ejecutar el programa).
-
-
-## 7. Estructura del proyecto
-
-POO_Unidad2_ContenidosAudiovisuales/
-|
-|-- src/
-|   |-- main/
-|       |-- java/
-|           |-- uni1a/
-|               |-- ContenidoAudiovisual.java
-|               |-- Pelicula.java
-|               |-- SerieDeTV.java
-|               |-- Documental.java
-|               |-- Actor.java
-|               |-- Temporada.java
-|               |-- Investigador.java
-|               |-- VideoMusical.java
-|               |-- ConferenciaCientifica.java
-|               |-- SistemaAudiovisual.java
-|
-|-- docs/
-|-- README.md
-|-- .gitignore
-|-- .project
-
-
-## 8. Instalación y ejecución
-
-### Clonar el repositorio
-
-Abrir una terminal y ejecutar:
-
-```git bash
-git clone https://github.com/Gabriel_Altamirano06/POO_Unidad2_ContenidosAudiovisuales.git
-```
-
-### Importar en Eclipse
-
-1. Abrir Eclipse.
-2. Seleccionar File.
-3. Seleccionar Import.
-4. Elegir General > Existing Projects into Workspace.
-5. Seleccionar la carpeta del repositorio clonado.
-6. Presionar Finish.
-
-### Ejecutar el sistema
-
-1. Abrir el paquete uni1a.
-2. Buscar SistemaAudiovisual.java.
-3. Hacer clic derecho sobre el archivo.
-4. Seleccionar Run As > Java Application.
-5. Utilizar el menú que aparece en la consola.
-
-## 9. Mejoras implementadas
-
-- Organización de las clases mediante herencia.
-- Administración de relaciones entre objetos.
-- Uso de colecciones ArrayList para gestionar los elementos relacionados.
-- Implementación de polimorfismo.
-- Validación de datos ingresados por el usuario.
-- Búsqueda y eliminación de contenidos por identificador.
-- Incorporación de dos nuevas subclases originales.
-
-## 10. Diagrama de clases
-
-El proyecto incluye un diagrama UML que representa las clases originales, las nuevas clases y sus relaciones.
-
-Consultar la carpeta docs para visualizar el diagrama.
-
-## 11. Tecnologías utilizadas
+## 3. Tecnologías utilizadas
 
 - Lenguaje de programación: Java.
 - Entorno de desarrollo: Eclipse IDE.
-- Gestión de versiones: Git.
-- Repositorio: GitHub.
-- Diagramación: diagrams.net (draw.io).
+- Plataforma de alojamiento: GitHub.
+- Gestión de repositorios: GitHub Desktop.
+- Pruebas unitarias: JUnit 4.
+- Diagrama de clases: Draw.io.
+
+## 4. Funcionalidades del sistema
+
+El sistema permite:
+
+- Registrar películas.
+- Registrar series de televisión.
+- Registrar documentales.
+- Registrar videos musicales.
+- Registrar conferencias científicas.
+- Asociar actores a películas y videos musicales.
+- Asociar temporadas a series.
+- Asociar investigadores a documentales y conferencias.
+- Consultar todos los contenidos registrados.
+- Buscar contenidos mediante su identificador.
+- Eliminar contenidos.
+- Guardar y recuperar información mediante archivos CSV.
+
+## 5. Estructura del proyecto
+
+El código se encuentra organizado en los siguientes paquetes:
+
+- **modelo:** contiene las clases que representan los contenidos audiovisuales, actores, temporadas e investigadores.
+- **vista:** contiene la interfaz de consola y los métodos de interacción con el usuario.
+- **controlador:** coordina las operaciones y conecta la vista con el modelo.
+- **persistencia:** contiene las interfaces de almacenamiento y la implementación de lectura y escritura CSV.
+- **aplicacion:** contiene la clase principal para ejecutar el sistema.
+- **test:** contiene las pruebas unitarias.
+- **data:** almacena los archivos CSV.
+- **docs:** contiene el diagrama de clases y la documentación del proyecto.
+
+## 6. Manejo de archivos CSV
+
+La persistencia se implementó mediante archivos CSV con codificación UTF-8.
+
+Se utilizan cuatro archivos:
+
+- `contenidos.csv`: información de los contenidos audiovisuales.
+- `actores.csv`: información de los actores y sus relaciones.
+- `temporadas.csv`: información de las temporadas de las series.
+- `investigadores.csv`: información de los investigadores y sus relaciones.
+
+## 7. Arquitectura MVC y principios SOLID
+
+El proyecto utiliza el patrón Modelo-Vista-Controlador:
+
+- **Modelo:** representa los datos y las entidades del sistema.
+- **Vista:** presenta los menús y recibe información del usuario.
+- **Controlador:** coordina las operaciones y gestiona la comunicación entre componentes.
+
+Se aplican los principios SOLID:
+
+- SRP: separación de responsabilidades.
+- OCP: diseño extensible mediante abstracciones y herencia.
+- LSP: utilización de las subclases mediante la clase base.
+- ISP: separación de las interfaces de lectura y escritura.
+- DIP: dependencia de abstracciones mediante inyección de dependencias.
+
+## 8. Ejecución del proyecto
+
+Para ejecutar la aplicación:
+
+1. Clonar el repositorio desde GitHub.
+2. Abrir Eclipse IDE.
+3. Importar el proyecto o configurarlo como proyecto Java.
+4. Comprobar que `src/main/java` esté configurada como carpeta de código fuente.
+5. Verificar que JUnit 4 esté agregado al Build Path.
+6. Abrir `SistemaAudiovisualApp.java`.
+7. Ejecutar mediante `Run As → Java Application`.
+
+## 9. Ejecución de pruebas unitarias
+
+Las pruebas se encuentran en la carpeta `test`.
+
+Se implementaron pruebas para comprobar:
+
+- El almacenamiento y recuperación de contenidos audiovisuales.
+- La lectura de directorios sin archivos CSV.
+- El manejo de identificadores incorrectos.
+- El registro de contenidos.
+- La búsqueda mediante identificadores.
+- La eliminación de contenidos.
+- El tratamiento de valores nulos.
+- El control de errores durante el almacenamiento.
+
+## 10. Conclusión
+
+La actualización del sistema permitió mejorar su organización y mantenibilidad mediante la aplicación de principios de programación limpia, SOLID y arquitectura MVC.
+
+La incorporación de persistencia mediante archivos CSV permite conservar la información registrada, mientras que las pruebas unitarias contribuyen a comprobar la calidad y fiabilidad de las funcionalidades implementadas.
