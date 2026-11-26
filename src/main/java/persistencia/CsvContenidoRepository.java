@@ -8,55 +8,134 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import modelo.Actor;
-import modelo.ConferenciaCientifica;
 import modelo.ContenidoAudiovisual;
-import modelo.Documental;
 import modelo.Investigador;
-import modelo.Pelicula;
-import modelo.SerieDeTV;
 import modelo.Temporada;
-import modelo.VideoMusical;
 
+import persistencia.adaptadores.ConferenciaCsvAdapter;
+import persistencia.adaptadores.ContenidoCsvAdapter;
+import persistencia.adaptadores.DocumentalCsvAdapter;
+import persistencia.adaptadores.PeliculaCsvAdapter;
+import persistencia.adaptadores.SerieCsvAdapter;
+import persistencia.adaptadores.VideoMusicalCsvAdapter;
 
-// Implementa la lectura y escritura de los contenidos audiovisuales utilizando archivos CSV.
+// Repositorio CSV que delega la conversion de cada tipo de contenido a un adaptador especializado.
 
 public class CsvContenidoRepository implements ContenidoRepository {
 
     private final Path carpetaDatos;
-
     private final Path archivoContenidos;
     private final Path archivoActores;
     private final Path archivoTemporadas;
     private final Path archivoInvestigadores;
+
+    private final List<ContenidoCsvAdapter<? extends ContenidoAudiovisual>>
+        adaptadores;
+
+    private final Map<String,
+        ContenidoCsvAdapter<? extends ContenidoAudiovisual>>
+        adaptadoresPorTipo;
 
     public CsvContenidoRepository() {
         this(Paths.get("data"));
     }
 
     public CsvContenidoRepository(Path carpetaDatos) {
+        this(carpetaDatos, crearAdaptadoresPredeterminados());
+    }
+
+
+// Constructor que permite inyectar nuevos adaptadores.
+
+    public CsvContenidoRepository(
+            Path carpetaDatos,
+            List<ContenidoCsvAdapter<? extends ContenidoAudiovisual>>
+            adaptadores) {
+
+        if (carpetaDatos == null || adaptadores == null
+                || adaptadores.isEmpty()) {
+
+            throw new IllegalArgumentException(
+                "La carpeta y la lista de adaptadores son obligatorias."
+            );
+        }
 
         this.carpetaDatos = carpetaDatos;
 
-        archivoContenidos = carpetaDatos.resolve("contenidos.csv");
-        archivoActores = carpetaDatos.resolve("actores.csv");
-        archivoTemporadas = carpetaDatos.resolve("temporadas.csv");
-        archivoInvestigadores =
+        this.archivoContenidos =
+            carpetaDatos.resolve("contenidos.csv");
+
+        this.archivoActores =
+            carpetaDatos.resolve("actores.csv");
+
+        this.archivoTemporadas =
+            carpetaDatos.resolve("temporadas.csv");
+
+        this.archivoInvestigadores =
             carpetaDatos.resolve("investigadores.csv");
+
+        this.adaptadores = new ArrayList<>(adaptadores);
+        this.adaptadoresPorTipo = new LinkedHashMap<>();
+
+        for (ContenidoCsvAdapter<? extends ContenidoAudiovisual> adaptador
+                : this.adaptadores) {
+
+            if (adaptador == null || adaptador.obtenerTipo() == null
+                    || adaptador.obtenerTipo().trim().isEmpty()) {
+
+                throw new IllegalArgumentException(
+                    "Existe un adaptador invalido."
+                );
+            }
+
+            if (adaptadoresPorTipo.containsKey(adaptador.obtenerTipo())) {
+
+                throw new IllegalArgumentException(
+                    "Tipo de contenido duplicado: "
+                    + adaptador.obtenerTipo()
+                );
+            }
+
+            adaptadoresPorTipo.put(
+                adaptador.obtenerTipo(), adaptador
+            );
+        }
     }
 
+    
+// Registra los cinco adaptadores iniciales del sistema.
+
+    private static List<ContenidoCsvAdapter<? extends ContenidoAudiovisual>>
+            crearAdaptadoresPredeterminados() {
+
+        List<ContenidoCsvAdapter<? extends ContenidoAudiovisual>> lista =
+            new ArrayList<>();
+
+        lista.add(new PeliculaCsvAdapter());
+        lista.add(new SerieCsvAdapter());
+        lista.add(new DocumentalCsvAdapter());
+        lista.add(new VideoMusicalCsvAdapter());
+        lista.add(new ConferenciaCsvAdapter());
+
+        return lista;
+    }
+
+
+    // GUARDAR INFORMACION
   
+
     @Override
     public void guardar(List<ContenidoAudiovisual> contenidos)
             throws IOException {
 
         if (contenidos == null) {
+
             throw new IllegalArgumentException(
                 "La lista de contenidos no puede ser nula."
             );
@@ -77,94 +156,34 @@ public class CsvContenidoRepository implements ContenidoRepository {
         try (BufferedWriter escritor = Files.newBufferedWriter(
                 archivoContenidos, StandardCharsets.UTF_8)) {
 
-            escribirFila(escritor,
-                "tipo", "id", "titulo", "duracion", "genero",
-                "dato1", "dato2", "dato3", "dato4"
+            escribirFila(
+                escritor,
+                "tipo", "id", "titulo", "duracion",
+                "genero", "dato1", "dato2", "dato3", "dato4"
             );
 
             for (ContenidoAudiovisual contenido : contenidos) {
 
-                if (contenido instanceof Pelicula) {
+                ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                    adaptador = buscarAdaptador(contenido);
 
-                    Pelicula pelicula = (Pelicula) contenido;
+                String[] datos =
+                    obtenerDatosEspecificos(adaptador, contenido);
 
-                    escribirFila(escritor,
-                        "PELICULA",
-                        String.valueOf(contenido.getId()),
-                        contenido.getTitulo(),
-                        String.valueOf(
-                            contenido.getDuracionEnMinutos()),
-                        contenido.getGenero(),
-                        pelicula.getEstudio(), "", "", ""
-                    );
-
-                } else if (contenido instanceof SerieDeTV) {
-
-                    escribirFila(escritor,
-                        "SERIE",
-                        String.valueOf(contenido.getId()),
-                        contenido.getTitulo(),
-                        String.valueOf(
-                            contenido.getDuracionEnMinutos()),
-                        contenido.getGenero(),
-                        "", "", "", ""
-                    );
-
-                } else if (contenido instanceof Documental) {
-
-                    Documental documental = (Documental) contenido;
-
-                    escribirFila(escritor,
-                        "DOCUMENTAL",
-                        String.valueOf(contenido.getId()),
-                        contenido.getTitulo(),
-                        String.valueOf(
-                            contenido.getDuracionEnMinutos()),
-                        contenido.getGenero(),
-                        documental.getTema(), "", "", ""
-                    );
-
-                } else if (contenido instanceof VideoMusical) {
-
-                    VideoMusical video = (VideoMusical) contenido;
-
-                    escribirFila(escritor,
-                        "VIDEO_MUSICAL",
-                        String.valueOf(contenido.getId()),
-                        contenido.getTitulo(),
-                        String.valueOf(
-                            contenido.getDuracionEnMinutos()),
-                        contenido.getGenero(),
-                        video.getArtistaPrincipal(),
-                        video.getSelloDiscografico(),
-                        String.valueOf(video.getAnioLanzamiento()),
-                        ""
-                    );
-
-                } else if (contenido instanceof ConferenciaCientifica) {
-
-                    ConferenciaCientifica conferencia =
-                        (ConferenciaCientifica) contenido;
-
-                    escribirFila(escritor,
-                        "CONFERENCIA",
-                        String.valueOf(contenido.getId()),
-                        contenido.getTitulo(),
-                        String.valueOf(
-                            contenido.getDuracionEnMinutos()),
-                        contenido.getGenero(),
-                        conferencia.getTemaCentral(),
-                        conferencia.getInstitucionOrganizadora(),
-                        conferencia.getFechaRealizacion(),
-                        conferencia.getModalidad()
-                    );
-
-                } else {
-
-                    throw new IOException(
-                        "Tipo de contenido no reconocido."
-                    );
-                }
+                escribirFila(
+                    escritor,
+                    adaptador.obtenerTipo(),
+                    String.valueOf(contenido.getId()),
+                    contenido.getTitulo(),
+                    String.valueOf(
+                        contenido.getDuracionEnMinutos()
+                    ),
+                    contenido.getGenero(),
+                    datos[0],
+                    datos[1],
+                    datos[2],
+                    datos[3]
+                );
             }
         }
     }
@@ -176,42 +195,21 @@ public class CsvContenidoRepository implements ContenidoRepository {
         try (BufferedWriter escritor = Files.newBufferedWriter(
                 archivoActores, StandardCharsets.UTF_8)) {
 
-            escribirFila(escritor,
+            escribirFila(
+                escritor,
                 "contenidoId", "tipoRelacion", "nombre",
                 "nacionalidad", "edad"
             );
 
             for (ContenidoAudiovisual contenido : contenidos) {
 
-                if (contenido instanceof Pelicula) {
+                ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                    adaptador = buscarAdaptador(contenido);
 
-                    Pelicula pelicula = (Pelicula) contenido;
+                for (String[] fila :
+                        obtenerFilasActores(adaptador, contenido)) {
 
-                    for (Actor actor : pelicula.getActores()) {
-
-                        escribirFila(escritor,
-                            String.valueOf(contenido.getId()),
-                            "PELICULA",
-                            actor.getNombre(),
-                            actor.getNacionalidad(),
-                            String.valueOf(actor.getEdad())
-                        );
-                    }
-
-                } else if (contenido instanceof VideoMusical) {
-
-                    VideoMusical video = (VideoMusical) contenido;
-
-                    for (Actor actor : video.getActoresParticipantes()) {
-
-                        escribirFila(escritor,
-                            String.valueOf(contenido.getId()),
-                            "VIDEO_MUSICAL",
-                            actor.getNombre(),
-                            actor.getNacionalidad(),
-                            String.valueOf(actor.getEdad())
-                        );
-                    }
+                    escribirFila(escritor, fila);
                 }
             }
         }
@@ -224,30 +222,21 @@ public class CsvContenidoRepository implements ContenidoRepository {
         try (BufferedWriter escritor = Files.newBufferedWriter(
                 archivoTemporadas, StandardCharsets.UTF_8)) {
 
-            escribirFila(escritor,
+            escribirFila(
+                escritor,
                 "contenidoId", "numeroTemporada",
                 "anioEstreno", "numeroEpisodios"
             );
 
             for (ContenidoAudiovisual contenido : contenidos) {
 
-                if (contenido instanceof SerieDeTV) {
+                ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                    adaptador = buscarAdaptador(contenido);
 
-                    SerieDeTV serie = (SerieDeTV) contenido;
+                for (String[] fila :
+                        obtenerFilasTemporadas(adaptador, contenido)) {
 
-                    for (Temporada temporada :
-                            serie.getListaTemporadas()) {
-
-                        escribirFila(escritor,
-                            String.valueOf(contenido.getId()),
-                            String.valueOf(
-                                temporada.getNumeroTemporada()),
-                            String.valueOf(
-                                temporada.getAnioEstreno()),
-                            String.valueOf(
-                                temporada.getNumeroEpisodios())
-                        );
-                    }
+                    escribirFila(escritor, fila);
                 }
             }
         }
@@ -260,53 +249,33 @@ public class CsvContenidoRepository implements ContenidoRepository {
         try (BufferedWriter escritor = Files.newBufferedWriter(
                 archivoInvestigadores, StandardCharsets.UTF_8)) {
 
-            escribirFila(escritor,
+            escribirFila(
+                escritor,
                 "contenidoId", "tipoRelacion", "nombre",
                 "especialidad", "institucion"
             );
 
             for (ContenidoAudiovisual contenido : contenidos) {
 
-                if (contenido instanceof Documental) {
+                ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                    adaptador = buscarAdaptador(contenido);
 
-                    Documental documental = (Documental) contenido;
+                for (String[] fila :
+                        obtenerFilasInvestigadores(adaptador, contenido)) {
 
-                    for (Investigador investigador :
-                            documental.getInvestigadores()) {
-
-                        escribirFila(escritor,
-                            String.valueOf(contenido.getId()),
-                            "DOCUMENTAL",
-                            investigador.getNombre(),
-                            investigador.getEspecialidad(),
-                            investigador.getInstitucion()
-                        );
-                    }
-
-                } else if (contenido instanceof ConferenciaCientifica) {
-
-                    ConferenciaCientifica conferencia =
-                        (ConferenciaCientifica) contenido;
-
-                    for (Investigador investigador :
-                            conferencia.getInvestigadores()) {
-
-                        escribirFila(escritor,
-                            String.valueOf(contenido.getId()),
-                            "CONFERENCIA",
-                            investigador.getNombre(),
-                            investigador.getEspecialidad(),
-                            investigador.getInstitucion()
-                        );
-                    }
+                    escribirFila(escritor, fila);
                 }
             }
         }
     }
 
 
+    // CARGAR INFORMACION
+
+
     @Override
-    public List<ContenidoAudiovisual> cargar() throws IOException {
+    public List<ContenidoAudiovisual> cargar()
+            throws IOException {
 
         Map<Integer, ContenidoAudiovisual> contenidos =
             new LinkedHashMap<>();
@@ -342,67 +311,31 @@ public class CsvContenidoRepository implements ContenidoRepository {
 
             String genero = fila.get(4);
 
-            ContenidoAudiovisual contenido;
+            String[] datos = {
+                fila.get(5),
+                fila.get(6),
+                fila.get(7),
+                fila.get(8)
+            };
 
-            switch (tipo) {
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador = adaptadoresPorTipo.get(tipo);
 
-                case "PELICULA":
+            if (adaptador == null) {
 
-                    contenido = new Pelicula(
-                        titulo, duracion, genero, fila.get(5)
-                    );
-                    break;
-
-                case "SERIE":
-
-                    contenido = new SerieDeTV(
-                        titulo, duracion, genero
-                    );
-                    break;
-
-                case "DOCUMENTAL":
-
-                    contenido = new Documental(
-                        titulo, duracion, genero, fila.get(5)
-                    );
-                    break;
-
-                case "VIDEO_MUSICAL":
-
-                    contenido = new VideoMusical(
-                        titulo,
-                        duracion,
-                        genero,
-                        fila.get(5),
-                        fila.get(6),
-                        convertirEntero(fila.get(7),
-                            "Año de lanzamiento")
-                    );
-                    break;
-
-                case "CONFERENCIA":
-
-                    contenido = new ConferenciaCientifica(
-                        titulo,
-                        duracion,
-                        genero,
-                        fila.get(5),
-                        fila.get(6),
-                        fila.get(7),
-                        fila.get(8)
-                    );
-                    break;
-
-                default:
-
-                    throw new IOException(
-                        "Tipo de contenido desconocido: " + tipo
-                    );
+                throw new IOException(
+                    "Tipo de contenido desconocido: " + tipo
+                );
             }
+
+            ContenidoAudiovisual contenido = crearContenido(
+                adaptador, titulo, duracion, genero, datos
+            );
 
             contenido.restaurarIdentificador(id);
 
             if (contenidos.containsKey(id)) {
+
                 throw new IOException(
                     "Identificador duplicado: " + id
                 );
@@ -425,7 +358,7 @@ public class CsvContenidoRepository implements ContenidoRepository {
                 fila.get(0), "ID de contenido"
             );
 
-            String tipo = fila.get(1);
+            String tipoRelacion = fila.get(1);
 
             Actor actor = new Actor(
                 fila.get(2),
@@ -436,23 +369,12 @@ public class CsvContenidoRepository implements ContenidoRepository {
             ContenidoAudiovisual contenido =
                 buscarContenido(contenidos, id);
 
-            if ("PELICULA".equals(tipo)
-                    && contenido instanceof Pelicula) {
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador = buscarAdaptador(contenido);
 
-                ((Pelicula) contenido).agregarActor(actor);
-
-            } else if ("VIDEO_MUSICAL".equals(tipo)
-                    && contenido instanceof VideoMusical) {
-
-                ((VideoMusical) contenido)
-                    .agregarActorParticipante(actor);
-
-            } else {
-
-                throw new IOException(
-                    "Relacion de actor incorrecta para el ID " + id
-                );
-            }
+            agregarActor(
+                adaptador, contenido, tipoRelacion, actor
+            );
         }
     }
 
@@ -472,28 +394,24 @@ public class CsvContenidoRepository implements ContenidoRepository {
             ContenidoAudiovisual contenido =
                 buscarContenido(contenidos, id);
 
-            if (!(contenido instanceof SerieDeTV)) {
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador = buscarAdaptador(contenido);
 
-                throw new IOException(
-                    "La temporada no pertenece a una serie. ID: " + id
-                );
-            }
-
-            SerieDeTV serie = (SerieDeTV) contenido;
-
-            int numero = convertirEntero(
-                fila.get(1), "Numero de temporada"
+            Temporada temporada = new Temporada(
+                convertirEntero(
+                    fila.get(1), "Numero de temporada"
+                ),
+                convertirEntero(
+                    fila.get(2), "Anio de estreno"
+                ),
+                convertirEntero(
+                    fila.get(3), "Numero de episodios"
+                )
             );
 
-            int anio = convertirEntero(
-                fila.get(2), "Año de estreno"
+            agregarTemporada(
+                adaptador, contenido, temporada
             );
-
-            int episodios = convertirEntero(
-                fila.get(3), "Numero de episodios"
-            );
-
-            serie.agregarTemporada(numero, anio, episodios);
         }
     }
 
@@ -510,7 +428,7 @@ public class CsvContenidoRepository implements ContenidoRepository {
                 fila.get(0), "ID de contenido"
             );
 
-            String tipo = fila.get(1);
+            String tipoRelacion = fila.get(1);
 
             Investigador investigador = new Investigador(
                 fila.get(2),
@@ -521,35 +439,232 @@ public class CsvContenidoRepository implements ContenidoRepository {
             ContenidoAudiovisual contenido =
                 buscarContenido(contenidos, id);
 
-            if ("DOCUMENTAL".equals(tipo)
-                    && contenido instanceof Documental) {
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador = buscarAdaptador(contenido);
 
-                ((Documental) contenido)
-                    .agregarInvestigador(investigador);
-
-            } else if ("CONFERENCIA".equals(tipo)
-                    && contenido instanceof ConferenciaCientifica) {
-
-                ((ConferenciaCientifica) contenido)
-                    .agregarInvestigador(investigador);
-
-            } else {
-
-                throw new IOException(
-                    "Relacion de investigador incorrecta. ID: " + id
-                );
-            }
+            agregarInvestigador(
+                adaptador, contenido, tipoRelacion, investigador
+            );
         }
     }
 
 
+    // SELECCION DE ADAPTADORES
 
-// Escribe una fila CSV separando los campos por punto y coma.
-// Las comillas internas se duplican para conservar los datos.
-   
-    private void escribirFila(
-            BufferedWriter escritor, String... campos)
+
+    private ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+            buscarAdaptador(ContenidoAudiovisual contenido)
             throws IOException {
+
+        if (contenido == null) {
+
+            throw new IOException(
+                "No se puede buscar un adaptador para contenido nulo."
+            );
+        }
+
+        for (ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador : adaptadores) {
+
+            if (adaptador.obtenerClase().isInstance(contenido)) {
+                return adaptador;
+            }
+        }
+
+        throw new IOException(
+            "No existe un adaptador registrado para: "
+            + contenido.getClass().getSimpleName()
+        );
+    }
+    
+   // METODOS AUXILIARES PARA GENERICOS
+
+
+    private String[] obtenerDatosEspecificos(
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador,
+            ContenidoAudiovisual contenido) {
+
+        return obtenerDatosTipados(adaptador, contenido);
+    }
+
+    private <T extends ContenidoAudiovisual> String[]
+            obtenerDatosTipados(
+                ContenidoCsvAdapter<T> adaptador,
+                ContenidoAudiovisual contenido) {
+
+        return adaptador.obtenerDatosEspecificos(
+            adaptador.obtenerClase().cast(contenido)
+        );
+    }
+
+    private ContenidoAudiovisual crearContenido(
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador,
+            String titulo,
+            int duracion,
+            String genero,
+            String[] datos) throws IOException {
+
+        return crearContenidoTipado(
+            adaptador, titulo, duracion, genero, datos
+        );
+    }
+
+    private <T extends ContenidoAudiovisual> T crearContenidoTipado(
+            ContenidoCsvAdapter<T> adaptador,
+            String titulo,
+            int duracion,
+            String genero,
+            String[] datos) throws IOException {
+
+        return adaptador.crearContenido(
+            titulo, duracion, genero, datos
+        );
+    }
+
+    private List<String[]> obtenerFilasActores(
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador,
+            ContenidoAudiovisual contenido) {
+
+        return obtenerFilasActoresTipadas(adaptador, contenido);
+    }
+
+    private <T extends ContenidoAudiovisual>
+            List<String[]> obtenerFilasActoresTipadas(
+                ContenidoCsvAdapter<T> adaptador,
+                ContenidoAudiovisual contenido) {
+
+        return adaptador.obtenerFilasActores(
+            adaptador.obtenerClase().cast(contenido),
+            contenido.getId()
+        );
+    }
+
+    private List<String[]> obtenerFilasTemporadas(
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador,
+            ContenidoAudiovisual contenido) {
+
+        return obtenerFilasTemporadasTipadas(adaptador, contenido);
+    }
+
+    private <T extends ContenidoAudiovisual>
+            List<String[]> obtenerFilasTemporadasTipadas(
+                ContenidoCsvAdapter<T> adaptador,
+                ContenidoAudiovisual contenido) {
+
+        return adaptador.obtenerFilasTemporadas(
+            adaptador.obtenerClase().cast(contenido),
+            contenido.getId()
+        );
+    }
+
+    private List<String[]> obtenerFilasInvestigadores(
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador,
+            ContenidoAudiovisual contenido) {
+
+        return obtenerFilasInvestigadoresTipadas(
+            adaptador, contenido
+        );
+    }
+
+    private <T extends ContenidoAudiovisual>
+            List<String[]> obtenerFilasInvestigadoresTipadas(
+                ContenidoCsvAdapter<T> adaptador,
+                ContenidoAudiovisual contenido) {
+
+        return adaptador.obtenerFilasInvestigadores(
+            adaptador.obtenerClase().cast(contenido),
+            contenido.getId()
+        );
+    }
+
+    private void agregarActor(
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador,
+            ContenidoAudiovisual contenido,
+            String tipoRelacion,
+            Actor actor) throws IOException {
+
+        agregarActorTipado(
+            adaptador, contenido, tipoRelacion, actor
+        );
+    }
+
+    private <T extends ContenidoAudiovisual> void agregarActorTipado(
+            ContenidoCsvAdapter<T> adaptador,
+            ContenidoAudiovisual contenido,
+            String tipoRelacion,
+            Actor actor) throws IOException {
+
+        adaptador.agregarActor(
+            adaptador.obtenerClase().cast(contenido),
+            tipoRelacion,
+            actor
+        );
+    }
+
+    private void agregarTemporada(
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador,
+            ContenidoAudiovisual contenido,
+            Temporada temporada) throws IOException {
+
+        agregarTemporadaTipado(
+            adaptador, contenido, temporada
+        );
+    }
+
+    private <T extends ContenidoAudiovisual>
+            void agregarTemporadaTipado(
+                ContenidoCsvAdapter<T> adaptador,
+                ContenidoAudiovisual contenido,
+                Temporada temporada) throws IOException {
+
+        adaptador.agregarTemporada(
+            adaptador.obtenerClase().cast(contenido),
+            temporada
+        );
+    }
+
+    private void agregarInvestigador(
+            ContenidoCsvAdapter<? extends ContenidoAudiovisual>
+                adaptador,
+            ContenidoAudiovisual contenido,
+            String tipoRelacion,
+            Investigador investigador) throws IOException {
+
+        agregarInvestigadorTipado(
+            adaptador, contenido, tipoRelacion, investigador
+        );
+    }
+
+    private <T extends ContenidoAudiovisual>
+            void agregarInvestigadorTipado(
+                ContenidoCsvAdapter<T> adaptador,
+                ContenidoAudiovisual contenido,
+                String tipoRelacion,
+                Investigador investigador) throws IOException {
+
+        adaptador.agregarInvestigador(
+            adaptador.obtenerClase().cast(contenido),
+            tipoRelacion,
+            investigador
+        );
+    }
+
+
+    // ESCRITURA Y LECTURA CSV
+   
+
+// Escribe una fila CSV respetando comillas y separadores.
+
+    private void escribirFila(
+            BufferedWriter escritor,
+            String... campos) throws IOException {
 
         for (int i = 0; i < campos.length; i++) {
 
@@ -577,13 +692,12 @@ public class CsvContenidoRepository implements ContenidoRepository {
 
         escritor.newLine();
     }
-
-
-// Lee un archivo CSV y comprueba el numero de columnas.
-
+    
+ // Lee las filas de un archivo CSV y valida sus columnas.
+   
     private List<List<String>> leerFilas(
-            Path archivo, int columnasEsperadas)
-            throws IOException {
+            Path archivo,
+            int columnasEsperadas) throws IOException {
 
         List<List<String>> filas = new ArrayList<>();
 
@@ -608,6 +722,7 @@ public class CsvContenidoRepository implements ContenidoRepository {
                 List<String> campos;
 
                 try {
+
                     campos = parsearLinea(linea);
 
                 } catch (IllegalArgumentException e) {
@@ -636,8 +751,8 @@ public class CsvContenidoRepository implements ContenidoRepository {
         return filas;
     }
 
-
-// Interpreta los campos CSV respetando comillas y punto y coma.
+ 
+// Interpreta una linea CSV respetando comillas.
 
     private List<String> parsearLinea(String linea) {
 
@@ -677,6 +792,7 @@ public class CsvContenidoRepository implements ContenidoRepository {
         }
 
         if (dentroComillas) {
+
             throw new IllegalArgumentException(
                 "Campo CSV con comillas incompletas."
             );
@@ -687,10 +803,14 @@ public class CsvContenidoRepository implements ContenidoRepository {
         return campos;
     }
 
-    private int convertirEntero(String valor, String campo)
-            throws IOException {
+   
+// Convierte un valor de texto en numero entero.
+
+    private int convertirEntero(
+            String valor, String campo) throws IOException {
 
         try {
+
             return Integer.parseInt(valor.trim());
 
         } catch (NumberFormatException e) {
@@ -702,6 +822,9 @@ public class CsvContenidoRepository implements ContenidoRepository {
         }
     }
 
+    
+// Busca un contenido mediante su identificador.
+ 
     private ContenidoAudiovisual buscarContenido(
             Map<Integer, ContenidoAudiovisual> contenidos,
             int id) throws IOException {
