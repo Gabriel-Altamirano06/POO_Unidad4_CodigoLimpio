@@ -147,50 +147,67 @@ public class SistemaAudiovisualController {
 
 // Registra una serie con sus temporadas.
 
-    private void registrarSerie() {
+private void registrarSerie() {
 
-        vista.mostrarMensaje("\n--- REGISTRO DE SERIE ---");
+    vista.mostrarMensaje("\n--- REGISTRO DE SERIE ---");
 
-        String titulo = vista.leerTexto("Titulo: ");
-        int duracion = vista.leerPositivo(
-            "Duracion en minutos: "
+    String titulo = vista.leerTexto("Titulo: ");
+
+    int duracion = vista.leerPositivo(
+        "Duracion en minutos: "
+    );
+
+    String genero = vista.leerTexto("Genero: ");
+
+    SerieDeTV serie = new SerieDeTV(
+        titulo, duracion, genero
+    );
+
+    int cantidad = vista.leerCantidad(
+        "Cantidad de temporadas: "
+    );
+
+    for (int i = 0; i < cantidad; i++) {
+
+        vista.mostrarMensaje(
+            "\nTemporada " + (i + 1)
         );
-        String genero = vista.leerTexto("Genero: ");
 
-        SerieDeTV serie = new SerieDeTV(
-            titulo, duracion, genero
+        int numero = vista.leerPositivo(
+            "Numero de temporada: "
         );
 
-        int cantidad = vista.leerCantidad(
-            "Cantidad de temporadas: "
+        int anio = vista.leerPositivo(
+            "Año de estreno: "
         );
 
-        for (int i = 0; i < cantidad; i++) {
+        int episodios = vista.leerPositivo(
+            "Numero de episodios: "
+        );
 
-            vista.mostrarMensaje(
-                "\nTemporada " + (i + 1)
-            );
-
-            int numero = vista.leerPositivo(
-                "Numero de temporada: "
-            );
-
-            int anio = vista.leerPositivo(
-                "Año de estreno: "
-            );
-
-            int episodios = vista.leerPositivo(
-                "Numero de episodios: "
-            );
+        try {
 
             serie.agregarTemporada(
                 numero, anio, episodios
             );
+
+            vista.mostrarMensaje(
+                "Temporada agregada correctamente."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            vista.mostrarMensaje(
+                "No se pudo agregar la temporada: "
+                + e.getMessage()
+            );
+
+            i--;
         }
-
-        registrarYGuardar(serie);
-
     }
+
+    registrarYGuardar(serie);
+}
 
 
 // Registra un documental con sus investigadores.

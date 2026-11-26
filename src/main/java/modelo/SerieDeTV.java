@@ -17,34 +17,43 @@ public class SerieDeTV extends ContenidoAudiovisual {
         this.listaTemporadas = new ArrayList<>();
     }
 
-    // Agregar una nueva temporada
-    public void agregarTemporada(int numeroTemporada,
-                                 int anioEstreno,
-                                 int numeroEpisodios) {
 
-        if (numeroTemporada <= 0 || anioEstreno <= 0
-                || numeroEpisodios <= 0) {
+// Agrega una temporada validando sus datos y evitando numeros duplicados.
 
-            System.out.println("Los datos de la temporada no son validos.");
-            return;
-        }
+public void agregarTemporada(
+        int numeroTemporada,
+        int anioEstreno,
+        int numeroEpisodios) {
 
-        // Evitar numeros de temporada duplicados
-        for (Temporada temporada : listaTemporadas) {
+    if (numeroTemporada <= 0
+            || anioEstreno <= 0
+            || numeroEpisodios <= 0) {
 
-            if (temporada.getNumeroTemporada() == numeroTemporada) {
-                System.out.println("La temporada ya existe.");
-                return;
-            }
-        }
-
-        // Crear el objeto Temporada dentro de SerieDeTV
-        Temporada nuevaTemporada = new Temporada(
-                numeroTemporada, anioEstreno, numeroEpisodios
+        throw new IllegalArgumentException(
+            "Los datos de la temporada no son validos."
         );
-
-        listaTemporadas.add(nuevaTemporada);
     }
+
+    for (Temporada temporada : listaTemporadas) {
+
+        if (temporada.getNumeroTemporada() == numeroTemporada) {
+
+            throw new IllegalArgumentException(
+                "La temporada " + numeroTemporada
+                + " ya existe en esta serie."
+            );
+        }
+    }
+
+    Temporada nuevaTemporada = new Temporada(
+        numeroTemporada,
+        anioEstreno,
+        numeroEpisodios
+    );
+
+    listaTemporadas.add(nuevaTemporada);
+}
+
 
     // Eliminar una temporada
     public void eliminarTemporada(int numeroTemporada) {
