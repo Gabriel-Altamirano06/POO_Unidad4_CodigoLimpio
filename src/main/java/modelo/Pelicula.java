@@ -46,27 +46,5 @@ public class Pelicula extends ContenidoAudiovisual {
         return new ArrayList<>(actores);
     }
 
-    @Override
-    public void mostrarDetalles() {
-
-        System.out.println("Detalles de la película:");
-        System.out.println("ID: " + getId());
-        System.out.println("Título: " + getTitulo());
-        System.out.println("Duración en minutos: " + getDuracionEnMinutos());
-        System.out.println("Género: " + getGenero());
-        System.out.println("Estudio: " + estudio);
-
-        System.out.println("Actores participantes:");
-
-        if (actores.isEmpty()) {
-            System.out.println("No hay actores registrados.");
-        } else {
-            for (Actor actor : actores) {
-                actor.mostrarInformacion();
-                System.out.println("--------------------");
-            }
-        }
-
-        System.out.println();
-    }
+     
 }

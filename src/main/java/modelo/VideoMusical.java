@@ -71,37 +71,4 @@ public class VideoMusical extends ContenidoAudiovisual {
         return new ArrayList<>(actoresParticipantes);
     }
 
-    // Metodo para mostrar los detalles
-    @Override
-    public void mostrarDetalles() {
-
-        System.out.println("DETALLES DEL VIDEO MUSICAL");
-
-        System.out.println("ID: " + getId());
-        System.out.println("Titulo: " + getTitulo());
-        System.out.println("Duracion: " + getDuracionEnMinutos());
-        System.out.println("Genero: " + getGenero());
-
-        System.out.println("Artista principal: " + artistaPrincipal);
-        System.out.println("Sello discografico: " + selloDiscografico);
-        System.out.println("Anio de lanzamiento: " + anioLanzamiento);
-
-        System.out.println("\nActores participantes:");
-
-        if (actoresParticipantes.isEmpty()) {
-
-            System.out.println("No hay participantes registrados.");
-
-        } else {
-
-            for (Actor actor : actoresParticipantes) {
-
-                actor.mostrarInformacion();
-
-                System.out.println("-------------------------");
-            }
-        }
-
-        System.out.println();
-    }
 }

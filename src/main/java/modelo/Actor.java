@@ -1,4 +1,4 @@
-package modelo;
+package modelo; 
 
 public class Actor {
 
@@ -39,10 +39,5 @@ public class Actor {
         this.edad = edad;
     }
 
-    // Metodo para mostrar la informacion
-    public void mostrarInformacion() {
-        System.out.println("Nombre: " + nombre);
-        System.out.println("Nacionalidad: " + nacionalidad);
-        System.out.println("Edad: " + edad);
-    }
+
 }

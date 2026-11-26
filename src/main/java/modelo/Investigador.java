@@ -44,11 +44,4 @@ public class Investigador {
         this.institucion = institucion;
     }
 
-    // Metodo para mostrar la informacion
-    public void mostrarInformacion() {
-
-        System.out.println("Nombre: " + nombre);
-        System.out.println("Especialidad: " + especialidad);
-        System.out.println("Institucion: " + institucion);
-    }
 }

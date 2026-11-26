@@ -50,35 +50,4 @@ public class Documental extends ContenidoAudiovisual {
         return new ArrayList<>(investigadores);
     }
 
-    // Mostrar los detalles del documental
-    @Override
-    public void mostrarDetalles() {
-
-        System.out.println("Detalles del documental:");
-
-        System.out.println("ID: " + getId());
-        System.out.println("Titulo: " + getTitulo());
-        System.out.println("Duracion en minutos: "
-                + getDuracionEnMinutos());
-        System.out.println("Genero: " + getGenero());
-        System.out.println("Tema: " + tema);
-
-        System.out.println("\nInvestigadores participantes:");
-
-        if (investigadores.isEmpty()) {
-
-            System.out.println("No hay investigadores registrados.");
-
-        } else {
-
-            for (Investigador investigador : investigadores) {
-
-                investigador.mostrarInformacion();
-
-                System.out.println("-------------------------");
-            }
-        }
-
-        System.out.println();
-    }
 }

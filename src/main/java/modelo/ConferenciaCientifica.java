@@ -84,39 +84,4 @@ public class ConferenciaCientifica extends ContenidoAudiovisual {
         return new ArrayList<>(investigadores);
     }
 
-    // Metodo para mostrar los detalles
-    @Override
-    public void mostrarDetalles() {
-
-        System.out.println("DETALLES DE LA CONFERENCIA CIENTIFICA");
-
-        System.out.println("ID: " + getId());
-        System.out.println("Titulo: " + getTitulo());
-        System.out.println("Duracion: " + getDuracionEnMinutos());
-        System.out.println("Genero: " + getGenero());
-
-        System.out.println("Tema central: " + temaCentral);
-        System.out.println("Institucion organizadora: "
-                + institucionOrganizadora);
-        System.out.println("Fecha de realizacion: " + fechaRealizacion);
-        System.out.println("Modalidad: " + modalidad);
-
-        System.out.println("\nInvestigadores participantes:");
-
-        if (investigadores.isEmpty()) {
-
-            System.out.println("No hay investigadores registrados.");
-
-        } else {
-
-            for (Investigador investigador : investigadores) {
-
-                investigador.mostrarInformacion();
-
-                System.out.println("-------------------------");
-            }
-        }
-
-        System.out.println();
-    }
 }

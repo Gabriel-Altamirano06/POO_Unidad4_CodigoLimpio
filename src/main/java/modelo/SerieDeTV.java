@@ -70,36 +70,4 @@ public class SerieDeTV extends ContenidoAudiovisual {
         return new ArrayList<>(listaTemporadas);
     }
 
-    // Mostrar los detalles de la serie
-    @Override
-    public void mostrarDetalles() {
-
-        System.out.println("Detalles de la serie de television:");
-        System.out.println("ID: " + getId());
-        System.out.println("Titulo: " + getTitulo());
-        System.out.println("Duracion en minutos: "
-                + getDuracionEnMinutos());
-        System.out.println("Genero: " + getGenero());
-
-        System.out.println("Cantidad de temporadas: "
-                + listaTemporadas.size());
-
-        System.out.println("\nInformacion de las temporadas:");
-
-        if (listaTemporadas.isEmpty()) {
-
-            System.out.println("No hay temporadas registradas.");
-
-        } else {
-
-            for (Temporada temporada : listaTemporadas) {
-
-                temporada.mostrarInformacion();
-
-                System.out.println("-------------------------");
-            }
-        }
-
-        System.out.println();
-    }
 }

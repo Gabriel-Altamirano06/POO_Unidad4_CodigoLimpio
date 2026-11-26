@@ -4,11 +4,19 @@ package vista;
 import java.util.List;
 import java.util.Scanner;
 
+import modelo.Actor;
+import modelo.ConferenciaCientifica;
 import modelo.ContenidoAudiovisual;
+import modelo.Documental;
+import modelo.Investigador;
+import modelo.Pelicula;
+import modelo.SerieDeTV;
+import modelo.Temporada;
+import modelo.VideoMusical;
 
 
- //Presenta los menus y resultados del sistema audiovisual.
- 
+// Presenta los menus, recibe los datos y muestra la informacion de los contenidos audiovisuales.
+
 public class ContenidoVista {
 
     private final Scanner entrada;
@@ -17,9 +25,6 @@ public class ContenidoVista {
         entrada = new Scanner(System.in);
     }
 
-    
-     // Muestra las opciones principales del sistema.
-     
     public void mostrarMenu() {
 
         System.out.println("\n========================================");
@@ -37,77 +42,239 @@ public class ContenidoVista {
         System.out.println("========================================");
     }
 
-    
-     // Lee la opcion seleccionada por el usuario.
-     
     public int leerOpcion() {
 
-        System.out.print("Seleccione una opcion: ");
-
-        String texto = entrada.nextLine();
-
-        try {
-            return Integer.parseInt(texto.trim());
-
-        } catch (NumberFormatException e) {
-            return -1;
-        }
+        return leerEntero("Seleccione una opcion: ");
     }
 
-    
-     // Muestra un mensaje en consola.
-     
     public void mostrarMensaje(String mensaje) {
         System.out.println(mensaje);
     }
 
-    
-     // Muestra todos los contenidos registrados.
-    
+
+// Presenta todos los contenidos mediante sus datos.
+
     public void mostrarContenidos(
             List<ContenidoAudiovisual> contenidos) {
 
         System.out.println("\n--- CONTENIDOS AUDIOVISUALES ---");
 
         if (contenidos == null || contenidos.isEmpty()) {
+
             mostrarMensaje("No existen contenidos registrados.");
             return;
         }
 
         for (ContenidoAudiovisual contenido : contenidos) {
 
-            contenido.mostrarDetalles();
+            mostrarDetalleContenido(contenido);
 
             System.out.println("----------------------------------------");
         }
     }
 
-    
-     // Solicita un identificador al usuario.
-     
-    public int leerIdentificador() {
 
-        System.out.print("Ingrese el ID del contenido: ");
+// Determina el tipo de contenido y presenta sus datos.
 
-        String texto = entrada.nextLine();
+    private void mostrarDetalleContenido(
+            ContenidoAudiovisual contenido) {
 
-        try {
-            return Integer.parseInt(texto.trim());
+        System.out.println("\nID: " + contenido.getId());
+        System.out.println("Titulo: " + contenido.getTitulo());
+        System.out.println("Duracion: "
+                + contenido.getDuracionEnMinutos() + " minutos");
+        System.out.println("Genero: " + contenido.getGenero());
 
-        } catch (NumberFormatException e) {
-            mostrarMensaje("Debe ingresar un numero entero valido.");
-            return -1;
+        if (contenido instanceof Pelicula) {
+
+            mostrarPelicula((Pelicula) contenido);
+
+        } else if (contenido instanceof SerieDeTV) {
+
+            mostrarSerie((SerieDeTV) contenido);
+
+        } else if (contenido instanceof Documental) {
+
+            mostrarDocumental((Documental) contenido);
+
+        } else if (contenido instanceof VideoMusical) {
+
+            mostrarVideoMusical((VideoMusical) contenido);
+
+        } else if (contenido instanceof ConferenciaCientifica) {
+
+            mostrarConferencia((ConferenciaCientifica) contenido);
         }
     }
 
-    
-    // Solicita un texto no vacio.
-     
+    private void mostrarPelicula(Pelicula pelicula) {
+
+        System.out.println("Tipo: Pelicula");
+        System.out.println("Estudio: " + pelicula.getEstudio());
+
+        System.out.println("\nActores participantes:");
+
+        if (pelicula.getActores().isEmpty()) {
+
+            System.out.println("No hay actores registrados.");
+
+        } else {
+
+            for (Actor actor : pelicula.getActores()) {
+                mostrarActor(actor);
+            }
+        }
+    }
+
+    private void mostrarSerie(SerieDeTV serie) {
+
+        System.out.println("Tipo: Serie de television");
+
+        System.out.println("Cantidad de temporadas: "
+                + serie.getListaTemporadas().size());
+
+        System.out.println("\nInformacion de las temporadas:");
+
+        if (serie.getListaTemporadas().isEmpty()) {
+
+            System.out.println("No hay temporadas registradas.");
+
+        } else {
+
+            for (Temporada temporada : serie.getListaTemporadas()) {
+                mostrarTemporada(temporada);
+            }
+        }
+    }
+
+    private void mostrarDocumental(Documental documental) {
+
+        System.out.println("Tipo: Documental");
+        System.out.println("Tema: " + documental.getTema());
+
+        System.out.println("\nInvestigadores participantes:");
+
+        if (documental.getInvestigadores().isEmpty()) {
+
+            System.out.println("No hay investigadores registrados.");
+
+        } else {
+
+            for (Investigador investigador :
+                    documental.getInvestigadores()) {
+
+                mostrarInvestigador(investigador);
+            }
+        }
+    }
+
+    private void mostrarVideoMusical(VideoMusical video) {
+
+        System.out.println("Tipo: Video musical");
+
+        System.out.println("Artista principal: "
+                + video.getArtistaPrincipal());
+
+        System.out.println("Sello discografico: "
+                + video.getSelloDiscografico());
+
+        System.out.println("Anio de lanzamiento: "
+                + video.getAnioLanzamiento());
+
+        System.out.println("\nParticipantes:");
+
+        if (video.getActoresParticipantes().isEmpty()) {
+
+            System.out.println("No hay participantes registrados.");
+
+        } else {
+
+            for (Actor actor : video.getActoresParticipantes()) {
+                mostrarActor(actor);
+            }
+        }
+    }
+
+    private void mostrarConferencia(
+            ConferenciaCientifica conferencia) {
+
+        System.out.println("Tipo: Conferencia cientifica");
+
+        System.out.println("Tema central: "
+                + conferencia.getTemaCentral());
+
+        System.out.println("Institucion organizadora: "
+                + conferencia.getInstitucionOrganizadora());
+
+        System.out.println("Fecha de realizacion: "
+                + conferencia.getFechaRealizacion());
+
+        System.out.println("Modalidad: "
+                + conferencia.getModalidad());
+
+        System.out.println("\nInvestigadores participantes:");
+
+        if (conferencia.getInvestigadores().isEmpty()) {
+
+            System.out.println("No hay investigadores registrados.");
+
+        } else {
+
+            for (Investigador investigador :
+                    conferencia.getInvestigadores()) {
+
+                mostrarInvestigador(investigador);
+            }
+        }
+    }
+
+    private void mostrarActor(Actor actor) {
+
+        System.out.println("Nombre: " + actor.getNombre());
+        System.out.println("Nacionalidad: "
+                + actor.getNacionalidad());
+        System.out.println("Edad: " + actor.getEdad());
+        System.out.println("-------------------------");
+    }
+
+    private void mostrarInvestigador(Investigador investigador) {
+
+        System.out.println("Nombre: " + investigador.getNombre());
+
+        System.out.println("Especialidad: "
+                + investigador.getEspecialidad());
+
+        System.out.println("Institucion: "
+                + investigador.getInstitucion());
+
+        System.out.println("-------------------------");
+    }
+
+    private void mostrarTemporada(Temporada temporada) {
+
+        System.out.println("Numero de temporada: "
+                + temporada.getNumeroTemporada());
+
+        System.out.println("Anio de estreno: "
+                + temporada.getAnioEstreno());
+
+        System.out.println("Numero de episodios: "
+                + temporada.getNumeroEpisodios());
+
+        System.out.println("-------------------------");
+    }
+
+    public int leerIdentificador() {
+
+        return leerEntero("Ingrese el ID del contenido: ");
+    }
+
     public String leerTexto(String mensaje) {
 
         String texto;
 
         do {
+
             System.out.print(mensaje);
             texto = entrada.nextLine().trim();
 
@@ -119,64 +286,56 @@ public class ContenidoVista {
 
         return texto;
     }
-    
 
-/**
- * Lee un numero entero y controla los datos incorrectos.
- */
-public int leerEntero(String mensaje) {
+    public int leerEntero(String mensaje) {
 
-    while (true) {
+        while (true) {
 
-        System.out.print(mensaje);
-        String texto = entrada.nextLine().trim();
+            System.out.print(mensaje);
+            String texto = entrada.nextLine().trim();
 
-        try {
-            return Integer.parseInt(texto);
+            try {
 
-        } catch (NumberFormatException e) {
-            mostrarMensaje("Ingrese un numero entero valido.");
+                return Integer.parseInt(texto);
+
+            } catch (NumberFormatException e) {
+
+                mostrarMensaje("Ingrese un numero entero valido.");
+            }
         }
     }
-}
 
-/**
- * Lee un numero entero positivo.
- */
-public int leerPositivo(String mensaje) {
+    public int leerPositivo(String mensaje) {
 
-    int numero;
+        int numero;
 
-    do {
-        numero = leerEntero(mensaje);
+        do {
 
-        if (numero <= 0) {
-            mostrarMensaje("El valor debe ser mayor que cero.");
-        }
+            numero = leerEntero(mensaje);
 
-    } while (numero <= 0);
+            if (numero <= 0) {
+                mostrarMensaje("El valor debe ser mayor que cero.");
+            }
 
-    return numero;
-}
+        } while (numero <= 0);
 
+        return numero;
+    }
 
-// Lee una cantidad que puede ser cero, pero no negativa.
+    public int leerCantidad(String mensaje) {
 
-public int leerCantidad(String mensaje) {
+        int cantidad;
 
-    int cantidad;
+        do {
 
-    do {
-        cantidad = leerEntero(mensaje);
+            cantidad = leerEntero(mensaje);
 
-        if (cantidad < 0) {
-            mostrarMensaje("La cantidad no puede ser negativa.");
-        }
+            if (cantidad < 0) {
+                mostrarMensaje("La cantidad no puede ser negativa.");
+            }
 
-    } while (cantidad < 0);
+        } while (cantidad < 0);
 
-    return cantidad;
-}
-
-    
+        return cantidad;
+    }
 }

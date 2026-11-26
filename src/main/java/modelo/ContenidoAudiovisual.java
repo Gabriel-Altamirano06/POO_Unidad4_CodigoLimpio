@@ -46,7 +46,6 @@ public abstract class ContenidoAudiovisual {
         return id;
     }
     
-    public abstract void mostrarDetalles();
     
 
 // Restaura el identificador original al cargar un contenido almacenado en un archivo CSV.

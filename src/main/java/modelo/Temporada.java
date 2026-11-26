@@ -44,11 +44,4 @@ public class Temporada {
         this.numeroEpisodios = numeroEpisodios;
     }
 
-    // Metodo para mostrar la informacion
-    public void mostrarInformacion() {
-
-        System.out.println("Numero de temporada: " + numeroTemporada);
-        System.out.println("Año de estreno: " + anioEstreno);
-        System.out.println("Numero de episodios: " + numeroEpisodios);
-    }
 }
