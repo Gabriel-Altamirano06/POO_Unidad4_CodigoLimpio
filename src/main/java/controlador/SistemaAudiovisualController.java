@@ -190,10 +190,6 @@ public class SistemaAudiovisualController {
 
         registrarYGuardar(serie);
 
-        vista.mostrarMensaje(
-            "Serie registrada correctamente. ID: "
-            + serie.getId()
-        );
     }
 
 
@@ -229,10 +225,6 @@ public class SistemaAudiovisualController {
 
         registrarYGuardar(documental);
 
-        vista.mostrarMensaje(
-            "Documental registrado correctamente. ID: "
-            + documental.getId()
-        );
     }
 
 
@@ -274,10 +266,6 @@ public class SistemaAudiovisualController {
 
         registrarYGuardar(video);
 
-        vista.mostrarMensaje(
-            "Video musical registrado correctamente. ID: "
-            + video.getId()
-        );
     }
 
 
@@ -332,10 +320,6 @@ public class SistemaAudiovisualController {
 
         registrarYGuardar(conferencia);
 
-        vista.mostrarMensaje(
-            "Conferencia registrada correctamente. ID: "
-            + conferencia.getId()
-        );
     }
 
 
