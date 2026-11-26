@@ -83,7 +83,31 @@ Se aplican los principios SOLID:
 - ISP: separación de las interfaces de lectura y escritura.
 - DIP: dependencia de abstracciones mediante inyección de dependencias.
 
-## 8. Ejecución del proyecto
+
+## 8. Aplicación del principio Open/Closed (OCP)
+
+Se implementó un mecanismo de adaptadores especializados para
+la persistencia de contenidos audiovisuales.
+
+La interfaz ContenidoCsvAdapter define las operaciones comunes
+para convertir los contenidos a registros CSV y reconstruirlos.
+
+Cada tipo de contenido dispone de su propio adaptador:
+
+- PeliculaCsvAdapter
+- SerieCsvAdapter
+- DocumentalCsvAdapter
+- VideoMusicalCsvAdapter
+- ConferenciaCsvAdapter
+
+CsvContenidoRepository administra estos adaptadores mediante
+una colección y un mapa de identificación por tipo.
+
+Esta estructura permite incorporar nuevos tipos de contenido
+mediante nuevos adaptadores, sin modificar la lógica general
+de lectura y escritura del repositorio.
+
+## 9. Ejecución del proyecto
 
 Para ejecutar la aplicación:
 
@@ -95,7 +119,7 @@ Para ejecutar la aplicación:
 6. Abrir `SistemaAudiovisualApp.java`.
 7. Ejecutar mediante `Run As → Java Application`.
 
-## 9. Ejecución de pruebas unitarias
+## 10. Ejecución de pruebas unitarias
 
 Las pruebas se encuentran en la carpeta `test`.
 
@@ -110,7 +134,7 @@ Se implementaron pruebas para comprobar:
 - El tratamiento de valores nulos.
 - El control de errores durante el almacenamiento.
 
-## 10. Conclusión
+## 11. Conclusión
 
 La actualización del sistema permitió mejorar su organización y mantenibilidad mediante la aplicación de principios de programación limpia, SOLID y arquitectura MVC.
 
